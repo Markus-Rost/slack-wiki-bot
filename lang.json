@@ -39,9 +39,9 @@
 	"diff": {
 		"invalid": "Invalid argument!",
 		"badrev": "At least one revision doesn't exist!",
-		"nocomment": "*No description provided*",
-		"notags": "*none*",
-		"hidden": "*hidden*",
+		"nocomment": "_No description provided_",
+		"notags": "_none_",
+		"hidden": "_hidden_",
 		"info": "Editor: %1$s\nEdit date: %2$s\nDifference: %3$s Bytes\nComment: %4$s\nTags: %5$s"
 	},
 	"search": {
