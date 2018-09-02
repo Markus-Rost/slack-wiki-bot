@@ -1,5 +1,4 @@
 const fs = require('fs');
-const process = JSON.parse(fs.readFileSync('config.json', 'utf8'));
 
 const { RTMClient } = require('@slack/client');
 var request = require('request');
