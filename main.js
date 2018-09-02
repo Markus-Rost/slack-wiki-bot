@@ -116,7 +116,7 @@ function cmd_link(channel, title, wiki, cmd) {
 							}
 							else {
 								if ( srbody.query.searchinfo.totalhits == 0 ) {
-									rtm.sendMessage( lang.search.noresult.replace( '%s', title ) + ' https://' + wiki + '.gamepedia.com/', channel );
+									rtm.sendMessage( lang.search.noresult.replace( '%s', '`' + title + '`' ) + ' https://' + wiki + '.gamepedia.com/', channel );
 								}
 								else if ( srbody.query.searchinfo.totalhits == 1 ) {
 									rtm.sendMessage( 'https://' + wiki + '.gamepedia.com/' + srbody.query.search[0].title.replace( / /g, '_' ) + '\n' + lang.search.infopage.replace( '%s', '`' + process.env.prefix + cmd + 'page ' + title + '`' ), channel );
