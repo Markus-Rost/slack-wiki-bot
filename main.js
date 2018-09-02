@@ -351,7 +351,7 @@ rtm.on( 'message', function(message) {
 	var cont = message.text;
 	var user = message.user;
 	var channel = message.channel;
-	if ( message.subtype || !cont.toLowerCase().includes( process.env.prefix ) || user == rtm.activeUserId ) return;
+	if ( message.subtype || message.thread_ts || !cont.toLowerCase().includes( process.env.prefix ) || user == rtm.activeUserId ) return;
 	
 	var wiki = ( botsettings[channel] ? botsettings[channel] : 'help' );
 	cont.split('\n').forEach( function(line) {
