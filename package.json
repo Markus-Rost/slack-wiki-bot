@@ -1,0 +1,17 @@
+{
+  "name": "slack-wiki-bot",
+  "version": "1.0.0",
+  "description": "A Wiki-Bot for the Gamepedia Slack",
+  "main": "main.js",
+  "scripts": {
+    "test": "node main.js debug",
+    "start": "node main.js"
+  },
+  "author": "MarkusRost",
+  "license": "ISC",
+  "dependencies": {
+    "@slack/client": "^4.6.0",
+    "npm": "^5.10.0",
+    "request": "^2.85.0"
+  }
+}
