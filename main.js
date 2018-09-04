@@ -216,7 +216,7 @@ function cmd_user(channel, username, wiki, title) {
 					}
 					var blockedby = body.query.users[0].blockedby;
 					var blockreason = body.query.users[0].blockreason;
-					rtm.sendMessage( 'https://' + wiki + '.gamepedia.com/UserProfile:' + username + '\n\n' + lang.user.info.replace( '%1$s', gender ).replace( '%2$s', registration ).replace( '%3$s', editcount ).replace( '%4$s', group ) + ( isBlocked ? '\n\n' + lang.user.blocked.replace( '%1$s', blockedtimestamp ).replace( '%2$s', blockexpiry ).replace( '%3$s', blockedby ).replace( '%4$s', blockreason.wikicode() ) : '' ), channel );
+					rtm.sendMessage( 'https://' + wiki + '.gamepedia.com/UserProfile:' + username + '\n\n' + lang.user.info.replace( '%1$s', gender ).replace( '%2$s', registration ).replace( '%3$s', editcount ).replace( '%4$s', group ) + ( isBlocked ? '\n\n' + lang.user.blocked.replace( '%1$s', blockedtimestamp ).replace( '%2$s', blockexpiry ).replace( '%3$s', blockedby ).replace( '%4$s', blockreason ) : '' ), channel );
 				}
 			}
 		} );
@@ -338,7 +338,7 @@ function cmd_diffsend(channel, args, wiki) {
 						}
 					} );
 						
-					rtm.sendMessage( 'https://' + wiki + '.gamepedia.com/' + title + '?diff=' + diff + '&oldid=' + oldid + '\n\n' + lang.diff.info.replace( '%1$s', editor ).replace( '%2$s', timestamp ).replace( '%3$s', size ).replace( '%4$s', comment.wikicode() ).replace( '%5$s', tags.join(', ').replace( /<[^>]+>(.+)<\/[^>]+>/g, '$1' ) ), channel );
+					rtm.sendMessage( 'https://' + wiki + '.gamepedia.com/' + title + '?diff=' + diff + '&oldid=' + oldid + '\n\n' + lang.diff.info.replace( '%1$s', editor ).replace( '%2$s', timestamp ).replace( '%3$s', size ).replace( '%4$s', comment ).replace( '%5$s', tags.join(', ') ), channel );
 				}
 			}
 			else rtm.sendMessage( lang.error, channel );
@@ -346,10 +346,6 @@ function cmd_diffsend(channel, args, wiki) {
 		
 	} );
 }
-
-String.prototype.wikicode = function() {
-	return this.replace( /\[\[(?:[^\|\]]+\|)?([^\]]+)\]\]/g, '$1' ).replace( /\/\*\s*([^\*]+?)\s*\*\//g, '→$1:' );
-};
 
 rtm.on( 'message', function(message) {
 	var cont = message.text;
