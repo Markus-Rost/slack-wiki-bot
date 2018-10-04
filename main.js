@@ -96,7 +96,7 @@ function cmd_link(channel, title, wiki, cmd) {
 	else if ( invoke.startsWith('userprofile:') ) cmd_user(channel, title.substr(12), wiki, title.replace( / /g, '_' ));
 	else {
 		request( {
-			uri: 'https://' + wiki + '.gamepedia.com/api.php?action=query&format=json&meta=siteinfo&siprop=general|interwikimap&redirects=true&titles=' + encodeURI( title ),
+			uri: 'https://' + wiki + '.gamepedia.com/api.php?action=query&format=json&meta=siteinfo&siprop=general&iwurl=true&redirects=true&titles=' + encodeURI( title ),
 			json: true
 		}, function( error, response, body ) {
 			if ( error || !response || !body || !body.query ) {
