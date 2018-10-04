@@ -351,7 +351,7 @@ function cmd_random(channel, wiki) {
 			else rtm.sendMessage( lang.search.error + ' https://' + wiki + '.gamepedia.com/Special:Random', channel );
 		}
 		else {
-			rtm.sendMessage( 'https://' + wiki + '.gamepedia.com/' + body.query.random[0].title.replace( / /g, '_' ).replace( /\?/g, '%3F' ), channel );
+			rtm.sendMessage( '🎲 https://' + wiki + '.gamepedia.com/' + body.query.random[0].title.replace( / /g, '_' ).replace( /\?/g, '%3F' ), channel );
 		}
 		
 	} );
