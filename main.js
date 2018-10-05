@@ -86,7 +86,7 @@ function cmd_link(channel, title, wiki, cmd) {
 	var invoke = title.split(' ')[0].toLowerCase();
 	var args = title.split(' ').slice(1);
 	
-	if ( title.toLowerCase() == 'random' || title == '🎲' ) cmd_random(channel, wiki);
+	if ( ( invoke == 'random' || invoke == '🎲' ) && !args.join('') ) cmd_random(channel, wiki);
 	else if ( invoke == 'page' ) rtm.sendMessage( 'https://' + wiki + '.gamepedia.com/' + args.join('_'), channel );
 	else if ( invoke == 'search' ) rtm.sendMessage( 'https://' + wiki + '.gamepedia.com/Special:Search/' + args.join('_').replace( /\?/g, '%3F' ), channel );
 	else if ( invoke == 'diff' ) cmd_diff(channel, args, wiki);
