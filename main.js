@@ -90,7 +90,7 @@ function cmd_link(channel, title, wiki, cmd) {
 	else if ( invoke == 'page' ) rtm.sendMessage( 'https://' + wiki + '.gamepedia.com/' + args.join('_'), channel );
 	else if ( invoke == 'search' ) rtm.sendMessage( 'https://' + wiki + '.gamepedia.com/Special:Search/' + args.join('_').replace( /\?/g, '%3F' ), channel );
 	else if ( invoke == 'diff' ) cmd_diff(channel, args, wiki);
-	else if ( title.includes( '#' ) ) rtm.sendMessage( 'https://' + wiki + '.gamepedia.com/' + title.toTitle(), channel );
+	else if ( title.includes( '#' ) ) rtm.sendMessage( 'https://' + wiki + '.gamepedia.com/' + title.split('#')[0].toTitle() + '#' + title.split('#').slice(1).join('#').toSection(), channel );
 	else if ( invoke == 'user' ) cmd_user(channel, args.join('_'), wiki, title.replace( / /g, '_' ));
 	else if ( invoke.startsWith('user:') ) cmd_user(channel, title.substr(5), wiki, title.replace( / /g, '_' ));
 	else if ( invoke.startsWith('userprofile:') ) cmd_user(channel, title.substr(12), wiki, title.replace( / /g, '_' ));
@@ -129,7 +129,7 @@ function cmd_link(channel, title, wiki, cmd) {
 						} );
 					}
 					else {
-						rtm.sendMessage( 'https://' + wiki + '.gamepedia.com/' + Object.values(body.query.pages)[0].title.toTitle() + ( body.query.redirects && body.query.redirects[0].tofragment ? '#' + encodeURIComponent( body.query.redirects[0].tofragment.replace( / /g, '_' ) ).replace( /\%/g, '.' ) : '' ), channel );
+						rtm.sendMessage( 'https://' + wiki + '.gamepedia.com/' + Object.values(body.query.pages)[0].title.toTitle() + ( body.query.redirects && body.query.redirects[0].tofragment ? '#' + body.query.redirects[0].tofragment.toSection() : '' ), channel );
 					}
 				}
 				else if ( body.query.interwiki ) {
@@ -362,7 +362,11 @@ function cmd_random(channel, wiki) {
 }
 
 String.prototype.toTitle = function() {
-	return this.replace( / /g, '_' ).replace( /\%/g, '%25' ).replace( /\?/g, '%3F' );
+	return this.replace( / /g, '_' ).replace( /\'/g, '%27' ).replace( /\%/g, '%25' ).replace( /\?/g, '%3F' );
+};
+
+String.prototype.toSection = function() {
+	return encodeURIComponent( this.replace( / /g, '_' ) ).replace( /\'/g, '%27' ).replace( /\%/g, '.' );
 };
 
 String.prototype.wikicode = function(wiki) {
