@@ -87,13 +87,13 @@ function cmd_link(channel, title, wiki, cmd) {
 	var args = title.split(' ').slice(1);
 	
 	if ( ( invoke == 'random' || invoke == '🎲' ) && !args.join('') ) cmd_random(channel, wiki);
-	else if ( invoke == 'page' ) rtm.sendMessage( 'https://' + wiki + '.gamepedia.com/' + args.join('_'), channel );
-	else if ( invoke == 'search' ) rtm.sendMessage( 'https://' + wiki + '.gamepedia.com/Special:Search/' + args.join('_').replace( /\?/g, '%3F' ), channel );
+	else if ( invoke == 'page' ) rtm.sendMessage( 'https://' + wiki + '.gamepedia.com/' + args.join('_').toTitle(), channel );
+	else if ( invoke == 'search' ) rtm.sendMessage( 'https://' + wiki + '.gamepedia.com/Special:Search/' + args.join('_').toTitle(), channel );
 	else if ( invoke == 'diff' ) cmd_diff(channel, args, wiki);
 	else if ( title.includes( '#' ) ) rtm.sendMessage( 'https://' + wiki + '.gamepedia.com/' + title.split('#')[0].toTitle() + '#' + title.split('#').slice(1).join('#').toSection(), channel );
-	else if ( invoke == 'user' ) cmd_user(channel, args.join('_'), wiki, title.replace( / /g, '_' ));
-	else if ( invoke.startsWith('user:') ) cmd_user(channel, title.substr(5), wiki, title.replace( / /g, '_' ));
-	else if ( invoke.startsWith('userprofile:') ) cmd_user(channel, title.substr(12), wiki, title.replace( / /g, '_' ));
+	else if ( invoke == 'user' ) cmd_user(channel, args.join('_').toTitle(), wiki, title.toTitle());
+	else if ( invoke.startsWith('user:') ) cmd_user(channel, title.substr(5).toTitle(), wiki, title.toTitle());
+	else if ( invoke.startsWith('userprofile:') ) cmd_user(channel, title.substr(12).toTitle(), wiki, title.toTitle());
 	else {
 		request( {
 			uri: 'https://' + wiki + '.gamepedia.com/api.php?action=query&format=json&meta=siteinfo&siprop=general&iwurl=true&redirects=true&titles=' + encodeURI( title ),
@@ -102,7 +102,7 @@ function cmd_link(channel, title, wiki, cmd) {
 			if ( error || !response || !body || !body.query ) {
 				console.log( 'Fehler beim Erhalten der Suchergebnisse' + ( error ? ': ' + error.message : ( body ? ( body.error ? ': ' + body.error.info : '.' ) : '.' ) ) );
 				if ( response && response.request && response.request.uri && response.request.uri.href == 'https://www.gamepedia.com/' ) rtm.sendMessage( lang.search.nowiki, channel );
-				else rtm.sendMessage( lang.search.error + ' https://' + wiki + '.gamepedia.com/' + title.toTitle(), channel );
+				else rtm.sendMessage( lang.search.error + ' https://' + wiki + '.gamepedia.com/Special:Search/' + title.toTitle(), channel );
 			}
 			else {
 				if ( body.query.pages ) {
@@ -113,7 +113,7 @@ function cmd_link(channel, title, wiki, cmd) {
 						}, function( srerror, srresponse, srbody ) {
 							if ( srerror || !srresponse || !srbody || !srbody.query || ( !srbody.query.search[0] && srbody.query.searchinfo.totalhits != 0 ) ) {
 								console.log( 'Fehler beim Erhalten der Suchergebnisse' + ( srerror ? ': ' + srerror.message : ( srbody ? ( srbody.error ? ': ' + srbody.error.info : '.' ) : '.' ) ) );
-								rtm.sendMessage( lang.search.error + ' https://' + wiki + '.gamepedia.com/' + title.toTitle(), channel );
+								rtm.sendMessage( lang.search.error + ' https://' + wiki + '.gamepedia.com/Special:Search/' + title.toTitle(), channel );
 							}
 							else {
 								if ( srbody.query.searchinfo.totalhits == 0 ) {
