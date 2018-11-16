@@ -223,21 +223,22 @@ function cmd_diff(channel, args, wiki) {
 		var error = false;
 		var title = '';
 		var revision = 0;
-		var diff = 'prev';
+		var diff = 0;
+		var relative = 'prev';
 		if ( /^\d+$/.test(args[0]) ) {
 			revision = args[0];
 			if ( args[1] ) {
 				if ( /^\d+$/.test(args[1]) ) {
 					diff = args[1];
 				}
-				else if ( args[1] == 'prev' || args[1] == 'next' ) {
-					diff = args[1];
+				else if ( args[1] == 'prev' || args[1] == 'next' || args[1] == 'cur' ) {
+					relative = args[1];
 				}
 				else error = true;
 			}
 		}
-		else if ( args[0] == 'prev' || args[0] == 'next' ) {
-			diff = args[0];
+		else if ( args[0] == 'prev' || args[0] == 'next' || args[0] == 'cur' ) {
+			relative = args[0];
 			if ( args[1] ) {
 				if ( /^\d+$/.test(args[1]) ) {
 					revision = args[1];
@@ -249,7 +250,7 @@ function cmd_diff(channel, args, wiki) {
 		else title = args.join('_').replace( /\?/g, '%3F' );
 		
 		if ( error ) rtm.sendMessage( lang.diff.invalid, channel );
-		else if ( /^\d+$/.test(diff) ) {
+		else if ( diff ) {
 			var argids = [];
 			if ( parseInt(revision, 10) > parseInt(diff, 10) ) argids = [revision, diff];
 			else if ( parseInt(revision, 10) == parseInt(diff, 10) ) argids = [revision];
@@ -258,29 +259,27 @@ function cmd_diff(channel, args, wiki) {
 		}
 		else {
 			request( {
-				uri: 'https://' + wiki + '.gamepedia.com/api.php?action=query&format=json&prop=revisions&rvprop=' + ( title ? '&titles=' + title : '&revids=' + revision ) + '&rvdiffto=' + diff,
+				uri: 'https://' + wiki + '.gamepedia.com/api.php?action=compare&format=json&prop=ids' + ( title ? '&fromtitle=' + title : '&fromrev=' + revision ) + '&torelative=' + relative,
 				json: true
 			}, function( error, response, body ) {
-				if ( error || !response || !body || !body.query ) {
+				if ( error || !response || !body || ( !body.compare && body.error.code != 'nosuchrevid' ) ) {
 					console.log( 'Fehler beim Erhalten der Suchergebnisse' + ( error ? ': ' + error.message : ( body ? ( body.error ? ': ' + body.error.info : '.' ) : '.' ) ) );
 					if ( response && response.request && response.request.uri && response.request.uri.href == 'https://www.gamepedia.com/' ) rtm.sendMessage( lang.search.nowiki, channel );
-					else rtm.sendMessage( lang.search.error + ' https://' + wiki + '.gamepedia.com/' + title + '?diff=' + diff + ( title ? '' : '&oldid=' + revision ), channel );
+					else rtm.sendMessage( lang.search.error + ' https://' + wiki + '.gamepedia.com/' + title + '?diff=' + relative + ( title ? '' : '&oldid=' + revision ), channel );
 				}
 				else {
-					if ( body.query.badrevids ) rtm.sendMessage( lang.diff.badrev, channel );
-					else if ( body.query.pages && body.query.pages[-1] ) rtm.sendMessage( 'This page does not exist!', channel );
-					else if ( body.query.pages ) {
-						var argids = [];
-						var ids = Object.values(body.query.pages)[0].revisions[0].diff;
-						if ( ids.from ) {
-							if ( ids.from > ids.to ) argids = [ids.from, ids.to];
-							else if ( ids.from == ids.to ) argids = [ids.to];
-							else argids = [ids.to, ids.from];
-						}
-						else argids = [ids.to];
+					if ( body.error && body.error.code == 'nosuchrevid' ) rtm.sendMessage( lang.diff.badrev, channel );
+					else if ( body.compare.fromarchive != undefined || body.compare.toarchive != undefined ) rtm.sendMessage( lang.error, channel );
+					else {
+							var argids = [];
+							var ids = body.compare;
+							if ( ids.fromrevid && !ids.torevid ) argids = [ids.fromrevid];
+							else if ( !ids.fromrevid && ids.torevid ) argids = [ids.torevid];
+							else if ( ids.fromrevid > ids.torevid ) argids = [ids.fromrevid, ids.torevid];
+							else if ( ids.fromrevid == ids.torevid ) argids = [ids.fromrevid];
+							else argids = [ids.torevid, ids.fromrevid];
 						cmd_diffsend(channel, argids, wiki);
 					}
-					else rtm.sendMessage( lang.error, channel );
 				}
 			} );
 		}
@@ -300,7 +299,7 @@ function cmd_diffsend(channel, args, wiki) {
 		}
 		else {
 			if ( body.query.badrevids ) rtm.sendMessage( lang.diff.badrev, channel );
-			else if ( body.query.pages ) {
+			else if ( body.query.pages && !body.query.pages['-1'] ) {
 				var pages = Object.values(body.query.pages);
 				if ( pages.length != 1 ) rtm.sendMessage( 'https://' + wiki + '.gamepedia.com/?diff=' + args[0] + ( args[1] ? '&oldid=' + args[1] : '' ), channel );
 				else {
