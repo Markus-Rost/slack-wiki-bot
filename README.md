@@ -1,2 +1,2 @@
-# slack-wiki-bot
-Wiki-Bot for Gamepedia Slack
+# Wiki-Bot
+A Wiki-Bot for the Gamepedia Slack
