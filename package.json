@@ -10,10 +10,10 @@
   "author": "MarkusRost",
   "license": "ISC",
   "dependencies": {
-    "@slack/client": "^4.6.0",
+    "@slack/client": "^4.8.0",
     "dotenv": "^6.1.0",
     "npm": "^5.10.0",
-    "request": "^2.85.0"
+    "request": "^2.88.0"
   },
   "repository": {
     "type": "git",
