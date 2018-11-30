@@ -1,3 +1,4 @@
+require('dotenv').config();
 const fs = require('fs');
 
 const { RTMClient } = require('@slack/client');
