@@ -124,13 +124,13 @@ function cmd_link(channel, title, wiki, cmd) {
 							}
 							else {
 								if ( srbody.query.searchinfo.totalhits == 0 ) {
-									rtm.sendMessage( lang.search.noresult.replace( '%s', '`' + title + '`' ) + ' https://' + wiki + '.gamepedia.com/', channel );
+									rtm.sendMessage( lang.search.noresult.replaceSave( '%s', '`' + title + '`' ) + ' https://' + wiki + '.gamepedia.com/', channel );
 								}
 								else if ( srbody.query.searchinfo.totalhits == 1 ) {
-									rtm.sendMessage( 'https://' + wiki + '.gamepedia.com/' + srbody.query.search[0].title.toTitle() + '\n' + lang.search.infopage.replace( '%s', '`' + process.env.prefix + cmd + 'page ' + title + '`' ), channel );
+									rtm.sendMessage( 'https://' + wiki + '.gamepedia.com/' + srbody.query.search[0].title.toTitle() + '\n' + lang.search.infopage.replaceSave( '%s', '`' + process.env.prefix + cmd + 'page ' + title + '`' ), channel );
 								}
 								else {
-									rtm.sendMessage( 'https://' + wiki + '.gamepedia.com/' + srbody.query.search[0].title.toTitle() + '\n' + lang.search.infosearch.replace( '%1$s', '`' + process.env.prefix + cmd + 'page ' + title + '`' ).replace( '%2$s', '`' + process.env.prefix + cmd + 'search ' + title + '`' ), channel );
+									rtm.sendMessage( 'https://' + wiki + '.gamepedia.com/' + srbody.query.search[0].title.toTitle() + '\n' + lang.search.infosearch.replaceSave( '%1$s', '`' + process.env.prefix + cmd + 'page ' + title + '`' ).replaceSave( '%2$s', '`' + process.env.prefix + cmd + 'search ' + title + '`' ), channel );
 								}
 							}
 						} );
@@ -144,7 +144,7 @@ function cmd_link(channel, title, wiki, cmd) {
 					var intertitle = inter.title.substr(inter.iw.length+1);
 					var regex = /^(?:https?:)?\/\/(.*)\.gamepedia\.com\//.exec(inter.url);
 					if ( regex != null ) {
-						var iwtitle = decodeURIComponent( inter.url.replace( regex[0], '' ) ).replace( /\_/g, ' ' ).replace( intertitle.replace( /\_/g, ' ' ), intertitle );
+						var iwtitle = decodeURIComponent( inter.url.replace( regex[0], '' ) ).replace( /\_/g, ' ' ).replaceSave( intertitle.replace( /\_/g, ' ' ), intertitle );
 						cmd_link(channel, iwtitle, regex[1], ' !' + regex[1] + ' ');
 					} else rtm.sendMessage( inter.url, channel );
 				}
@@ -218,7 +218,7 @@ function cmd_user(channel, username, wiki, title) {
 					}
 					var blockedby = body.query.users[0].blockedby;
 					var blockreason = body.query.users[0].blockreason;
-					rtm.sendMessage( 'https://' + wiki + '.gamepedia.com/UserProfile:' + username + '\n\n' + lang.user.info.replace( '%1$s', gender ).replace( '%2$s', registration ).replace( '%3$s', editcount ).replace( '%4$s', group ) + ( isBlocked ? '\n\n' + lang.user.blocked.replace( '%1$s', blockedtimestamp ).replace( '%2$s', blockexpiry ).replace( '%3$s', blockedby ).replace( '%4$s', blockreason.wikicode() ) : '' ), channel );
+					rtm.sendMessage( 'https://' + wiki + '.gamepedia.com/UserProfile:' + username + '\n\n' + lang.user.info.replaceSave( '%1$s', gender ).replaceSave( '%2$s', registration ).replaceSave( '%3$s', editcount ).replaceSave( '%4$s', group ) + ( isBlocked ? '\n\n' + lang.user.blocked.replaceSave( '%1$s', blockedtimestamp ).replaceSave( '%2$s', blockexpiry ).replaceSave( '%3$s', blockedby ).replaceSave( '%4$s', blockreason.wikicode() ) : '' ), channel );
 				}
 			}
 		} );
@@ -341,7 +341,7 @@ function cmd_diffsend(channel, args, wiki) {
 						}
 					} );
 						
-					rtm.sendMessage( 'https://' + wiki + '.gamepedia.com/' + title + '?diff=' + diff + '&oldid=' + oldid + '\n\n' + lang.diff.info.replace( '%1$s', editor ).replace( '%2$s', timestamp ).replace( '%3$s', size ).replace( '%4$s', comment.wikicode() ).replace( '%5$s', tags.join(', ').replace( /<[^>]+>(.+)<\/[^>]+>/g, '$1' ) ), channel );
+					rtm.sendMessage( 'https://' + wiki + '.gamepedia.com/' + title + '?diff=' + diff + '&oldid=' + oldid + '\n\n' + lang.diff.info.replaceSave( '%1$s', editor ).replaceSave( '%2$s', timestamp ).replaceSave( '%3$s', size ).replaceSave( '%4$s', comment.wikicode() ).replaceSave( '%5$s', tags.join(', ').replace( /<[^>]+>(.+)<\/[^>]+>/g, '$1' ) ), channel );
 				}
 			}
 			else rtm.sendMessage( lang.error, channel );
@@ -377,6 +377,10 @@ String.prototype.toSection = function() {
 
 String.prototype.wikicode = function(wiki) {
 	return this.replace( /\[\[(?:[^\|\]]+\|)?([^\]]+)\]\]/g, '$1' ).replace( /\/\*\s*([^\*]+?)\s*\*\//g, '→$1:' );
+};
+
+String.prototype.replaceSave = function(pattern, replacement) {
+	return this.replace( pattern, replacement.replace( '$', '$$$$' ) );
 };
 
 rtm.on( 'message', function(message) {
