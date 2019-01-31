@@ -380,7 +380,7 @@ String.prototype.wikicode = function(wiki) {
 };
 
 String.prototype.replaceSave = function(pattern, replacement) {
-	return this.replace( pattern, replacement.replace( '$', '$$$$' ) );
+	return this.replace( pattern, ( typeof replacement === 'string' ? replacement.replace( '$', '$$$$' ) : replacement ) );
 };
 
 rtm.on( 'message', function(message) {
