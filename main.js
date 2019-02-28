@@ -1,12 +1,13 @@
 require('dotenv').config();
-const fs = require('fs');
+const util = require('util');
+util.inspect.defaultOptions = {compact:false,breakLength:Infinity};
 
 const { RTMClient } = require('@slack/client');
 var request = require('request');
 
 const rtm = new RTMClient(process.env.token);
 
-var lang = JSON.parse(fs.readFileSync('lang.json', 'utf8'));
+var lang = require('./lang.json');
 
 var trysettings = 0;
 var botsettings = {};
@@ -85,6 +86,21 @@ function cmd_setwiki(channel, line, args, wiki) {
 		}
 	}
 	else {
+		cmd_link(channel, line.split(' ').slice(1).join(' '), wiki, ' ');
+	}
+}
+
+async function cmd_eval(channel, line, args, wiki) {
+	if ( args.length ) {
+		try {
+			var text = util.inspect( await eval( args.join(' ') ) );
+		} catch ( error ) {
+			var text = error.name + ': ' + error.message;
+		}
+		console.log( '--- EVAL START ---\n\u200b' + text.replace( /\n/g, '\n\u200b' ) + '\n--- EVAL END ---' );
+		if ( text.length > 4000 ) rtm.sendMessage( 'Long text', channel ).catch( err => rtm.sendMessage( err.name + ': ' + err.message, channel ) );
+		else rtm.sendMessage( '```\n' + text + '\n```', channel ).catch( err => rtm.sendMessage( err.name + ': ' + err.message, channel ) );
+	} else {
 		cmd_link(channel, line.split(' ').slice(1).join(' '), wiki, ' ');
 	}
 }
@@ -396,6 +412,7 @@ rtm.on( 'message', function(message) {
 			var args = line.split(' ').slice(2);
 			console.log( channel + ': ' + invoke + ' - ' + args );
 			if ( invoke == 'setwiki' ) cmd_setwiki(channel, line, args, wiki);
+			else if ( invoke == 'eval' && user == process.env.owner ) cmd_eval(channel, line, args, wiki);
 			else if ( invoke.startsWith('!') ) cmd_link(channel, args.join(' '), invoke.substr(1), ' ' + invoke + ' ');
 			else cmd_link(channel, line.split(' ').slice(1).join(' '), wiki, ' ');
 		}
