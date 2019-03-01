@@ -82,13 +82,8 @@ var app = express();
 app.use(bodyParser.json());
 
 app.post('/', function (req, res) {
-    var body = req.body;
 
-    console.log(req);
-    console.log('-----------------------');
-    console.log(res);
-    console.log('-----------------------');
-    console.log(body);
+    console.log(req,'-----------------------',res,'-----------------------',req.body);
 
     res.json({
         message: 'ok got it!'
