@@ -81,12 +81,13 @@ var app = express();
 
 app.use(bodyParser.json());
 
-app.post('/', function (req, res) {
+app.get('/', function (req, res) {
+	var body = req.body;
 
-    console.log(req.body,'-----------------------',res.body);
+    console.log(body);
 
     res.json({
-        message: 'ok got it!'
+        message: body
     });
 });
 
