@@ -9,36 +9,89 @@ const rtm = new RTMClient(process.env.token);
 const web = new WebClient(process.env.token);
 
 var lang = require('./lang.json');
+var multiManager = require('./wiki_manager.json');
 
-var trysettings = 0;
-var botsettings = {};
+var isDebug = ( process.argv[2] === 'debug' ? true : false );
+const access = {'PRIVATE-TOKEN': process.env.access};
+const timeoptions = {
+	year: 'numeric',
+	month: 'short',
+	day: 'numeric',
+	hour: '2-digit',
+	minute: '2-digit',
+	timeZone: 'UTC',
+	timeZoneName: 'short'
+}
+
+var trysettings = 1;
+var botsettings = {"default":"help"};
 
 function getSettings() {
 	request( {
 		uri: process.env.read + process.env.file + process.env.raw,
-		headers: {
-			'PRIVATE-TOKEN': process.env.access
-		},
+		headers: access,
 		json: true
 	}, function( error, response, body ) {
-		if ( error || !response || response.statusCode != 200 || !body || body.message || body.error ) {
-			console.log( trysettings + '. Fehler beim Erhalten der Einstellungen' + ( error ? ': ' + error : ( body ? ( body.message ? ': ' + body.message : ( body.error ? ': ' + body.error : '.' ) ) : '.' ) ) );
+		if ( error || !response || response.statusCode !== 200 || !body || body.message || body.error ) {
+			console.log( '- ' + trysettings + '. Fehler beim Erhalten der Einstellungen' + ( error ? ': ' + error : ( body ? ( body.message ? ': ' + body.message : ( body.error ? ': ' + body.error : '.' ) ) : '.' ) ) );
 			if ( trysettings < 10 ) {
 				trysettings++;
 				getSettings();
 			}
 		}
 		else {
-			console.log( 'Einstellungen erfolgreich ausgelesen.' );
+			console.log( '- Einstellungen erfolgreich ausgelesen.' );
 			botsettings = Object.assign({}, body);
 		}
 	} );
 }
 
+var allSites = [];
+
+function getAllSites() {
+	request( {
+		uri: 'https://help.gamepedia.com/api.php?action=allsites&formatversion=2&do=getSiteStats&filter=wikis|wiki_domain,wiki_display_name,wiki_managers,official_wiki,created,ss_good_articles,ss_total_pages,ss_total_edits,ss_active_users&format=json',
+		json: true
+	}, function( error, response, body ) {
+		if ( error || !response || response.statusCode !== 200 || !body || body.status !== 'okay' || !body.data || !body.data.wikis ) {
+			console.log( '- Fehler beim Erhalten der Wikis' + ( error ? ': ' + error : ( body ? ( body.error ? ': ' + body.error.info : '.' ) : '.' ) ) );
+		}
+		else {
+			console.log( '- Wikis erfolgreich ausgelesen.' );
+			allSites = Object.assign([], body.data.wikis.filter( site => /^[a-z\d-]{1,30}\.gamepedia\.com$/.test(site.wiki_domain) ));
+			allSites.filter( site => site.wiki_domain in multiManager ).forEach( function(site) {
+				site.wiki_managers = multiManager[site.wiki_domain].concat(site.wiki_managers).filter( (value, index, self) => self.indexOf(value) === index );
+			} );
+			allSites.filter( site => site.wiki_managers.length === 0 ).forEach( site => site.wiki_managers.push('MediaWiki default') );
+		}
+	} );
+}
+
 rtm.on('connected', function() {
-	console.log( 'Erfolgreich angemeldet!' );
+	console.log( '- Erfolgreich angemeldet!' );
 	getSettings();
+	getAllSites();
 });
+
+
+var express = require('express');
+var app = express();
+
+app.post('/', function (req, res) {
+    var body = req.body;
+
+    console.log(req);
+    console.log('-----------------------');
+    console.log(res);
+    console.log('-----------------------');
+    console.log(body);
+
+    res.json({
+        message: 'ok got it!'
+    });
+});
+
+app.listen(process.env.PORT);
 
 
 function cmd_setwiki(channel, line, args, wiki) {
@@ -54,9 +107,7 @@ function cmd_setwiki(channel, line, args, wiki) {
 				temp_settings[channel] = wikinew;
 				request.post( {
 					uri: process.env.save,
-					headers: {
-						'PRIVATE-TOKEN': process.env.access
-					},
+					headers: access,
 					body: {
 						branch: 'master',
 						commit_message: 'Slack: Einstellungen aktualisiert.',
@@ -91,7 +142,7 @@ function cmd_setwiki(channel, line, args, wiki) {
 	}
 }
 
-async function cmd_eval(channel, line, args, wiki) {
+async function cmd_eval(msg, channel, line, args, wiki) {
 	if ( args.length ) {
 		try {
 			var text = util.inspect( await eval( args.join(' ') ) );
@@ -413,7 +464,7 @@ rtm.on( 'message', function(message) {
 			var args = line.split(' ').slice(2);
 			console.log( channel + ': ' + invoke + ' - ' + args );
 			if ( invoke == 'setwiki' ) cmd_setwiki(channel, line, args, wiki);
-			else if ( invoke == 'eval' && user == process.env.owner ) cmd_eval(channel, line, args, wiki);
+			else if ( invoke == 'eval' && user == process.env.owner ) cmd_eval(message, channel, line, args, wiki);
 			else if ( invoke.startsWith('!') ) cmd_link(channel, args.join(' '), invoke.substr(1), ' ' + invoke + ' ');
 			else cmd_link(channel, line.split(' ').slice(1).join(' '), wiki, ' ');
 		}
