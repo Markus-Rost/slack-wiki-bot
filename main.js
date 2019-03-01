@@ -83,7 +83,7 @@ app.use(bodyParser.json());
 
 app.post('/', function (req, res) {
 
-    console.log(req,'-----------------------',res,'-----------------------',req.body);
+    console.log(req,'-----------------------',res);
 
     res.json({
         message: 'ok got it!'
