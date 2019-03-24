@@ -74,29 +74,9 @@ rtm.on('connected', function() {
 });
 
 
-var express = require('express');
-var bodyParser = require('body-parser');
-
-var app = express();
-
-app.use(bodyParser.json());
-
-app.get('/', function (req, res) {
-	var body = req.body;
-
-    console.log(body);
-
-    res.json({
-        message: body
-    });
-});
-
-app.listen(process.env.PORT);
-
-
 function cmd_setwiki(channel, line, args, wiki) {
 	if ( args[0] ) {
-		var regex = /^(?:(?:https?:)?\/\/)?([a-z\d-]{1,30})/
+		var regex = /^(?:https:\/\/)?([a-z\d-]{1,50})/
 		if ( regex.test(args[0].toLowerCase()) ) {
 			var wikinew = regex.exec(args[0].toLowerCase())[1];
 			if ( botsettings[channel] == wikinew ) {
